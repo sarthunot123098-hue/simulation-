@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>SwaSuraksha Attack Simulation</title>
+<style>
+:root{--bg:#0b1020;--panel:#141b31;--card:#1c2542;--text:#f4f7ff;--muted:#aeb8d2;--accent:#65d9ff;--good:#55d68b;--warn:#ffd166;--bad:#ff6b7a}
+*{box-sizing:border-box}body{margin:0;font-family:Arial,sans-serif;background:linear-gradient(135deg,#080d1a,#111a34);color:var(--text);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px}
+.wrap{width:min(1100px,100%)}.head{text-align:center;margin-bottom:22px}.head h1{margin:0;font-size:36px}.head p{color:var(--muted);margin:8px 0}
+.flow{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;align-items:center}.node{background:var(--card);border:1px solid #34405f;border-radius:16px;padding:20px 10px;text-align:center;font-weight:700;transition:.45s;min-height:90px}.arrow{text-align:center;color:var(--accent);font-size:25px}
+.row{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;align-items:center;margin-top:12px}.row .node:nth-child(1){grid-column:2}.row .node:nth-child(2){grid-column:3}.row .node:nth-child(3){grid-column:4}
+.active{transform:scale(1.06);border-color:var(--accent);box-shadow:0 0 24px #65d9ff33}.panel{margin-top:24px;background:var(--panel);border:1px solid #34405f;border-radius:18px;padding:22px}
+.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}.metric{background:var(--card);border-radius:12px;padding:14px}.label{color:var(--muted);font-size:13px}.value{font-size:25px;font-weight:800;margin-top:5px}
+.barbg{height:14px;background:#303a57;border-radius:20px;overflow:hidden;margin-top:18px}.bar{height:100%;width:9%;background:var(--good);transition:.7s}
+.desc{text-align:center;color:var(--muted);margin:16px 0}.buttons{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+button{border:1px solid #465372;background:#202a48;color:var(--text);padding:13px 18px;border-radius:10px;font-weight:700;cursor:pointer;min-height:46px}
+button:hover,button:focus{border-color:var(--accent);outline:2px solid #65d9ff55}.footer{text-align:center;color:var(--muted);font-size:12px;margin-top:18px}
+@media(max-width:700px){.flow{grid-template-columns:1fr}.row{grid-template-columns:1fr}.row .node:nth-child(1),.row .node:nth-child(2),.row .node:nth-child(3){grid-column:1}.arrow{transform:rotate(90deg)}.metrics{grid-template-columns:1fr 1fr}.head h1{font-size:28px}}
+</style>
+</head>
+<body>
+<div class="wrap" id="swasurakshaDemo">
+<div class="head"><h1>SwaSuraksha</h1><p>AI-Powered Voice Impersonation Protection • SIH26104</p></div>
+<div class="flow">
+<div id="n1" class="node">📞<br>Incoming Call</div><div class="arrow">→</div>
+<div id="n2" class="node">🎙️<br>Audio Analysis</div><div class="arrow">→</div>
+<div id="n3" class="node">🧠<br>AASIST</div>
+</div>
+<div class="row">
+<div id="n4" class="node">⚠️<br>Context Risk</div>
+<div id="n5" class="node">🛡️<br>Trust Engine</div>
+<div id="n6" class="node">🔐<br>Security Action</div>
+</div>
+<div class="panel">
+<div class="metrics">
+<div class="metric"><div class="label">SCENARIO</div><div id="scenario" class="value">Normal</div></div>
+<div class="metric"><div class="label">VOICE RISK</div><div id="voiceRisk" class="value">15/100</div></div>
+<div class="metric"><div class="label">FINAL RISK</div><div id="finalRisk" class="value">9/100</div></div>
+<div class="metric"><div class="label">DECISION</div><div id="decision" class="value">TRUSTED</div></div>
+</div>
+<div class="barbg"><div id="riskBar" class="bar"></div></div>
+<div id="description" class="desc" aria-live="polite">Low-risk interaction. The system allows the conversation.</div>
+<div class="buttons">
+<button type="button" id="genuineBtn">1 · Genuine Call</button>
+<button type="button" id="cloneBtn">2 · Cloned Voice</button>
+<button type="button" id="attackBtn">3 · High-Risk Attack</button>
+<button type="button" id="runBtn">▶ Run Full Simulation</button>
+</div>
+</div>
+<div class="footer">Demonstration simulation — prototype visualization, not a production risk calibration.</div>
+</div>
+
+<script>
+(function(){
+"use strict";
+var states=[
+ {scenario:"Normal",vr:15,fr:9,d:"TRUSTED",desc:"Low-risk interaction. The system allows the conversation.",color:"#55d68b",active:6},
+ {scenario:"Cloned Voice",vr:90,fr:54,d:"VERIFY",desc:"Strong spoof-like voice evidence. SwaSuraksha requests secondary verification.",color:"#ffd166",active:3},
+ {scenario:"High-Risk Attack",vr:90,fr:82,d:"HIGH-HOLD",desc:"Suspicious voice + sensitive request + urgency + unknown caller. Protection is escalated.",color:"#ff6b7a",active:5}
+];
+
+function byId(id){return document.getElementById(id);}
+
+function setState(index){
+ var s=states[index];
+ byId("scenario").textContent=s.scenario;
+ byId("voiceRisk").textContent=s.vr+"/100";
+ byId("finalRisk").textContent=s.fr+"/100";
+ byId("decision").textContent=s.d;
+ byId("description").textContent=s.desc;
+ byId("riskBar").style.width=s.fr+"%";
+ byId("riskBar").style.background=s.color;
+ var nodes=document.querySelectorAll("#swasurakshaDemo .node");
+ for(var i=0;i<nodes.length;i++) nodes[i].classList.remove("active");
+ byId("n"+s.active).classList.add("active");
+}
+
+var timer=null;
+byId("genuineBtn").addEventListener("click",function(){clearInterval(timer);setState(0);});
+byId("cloneBtn").addEventListener("click",function(){clearInterval(timer);setState(1);});
+byId("attackBtn").addEventListener("click",function(){clearInterval(timer);setState(2);});
+byId("runBtn").addEventListener("click",function(){
+ clearInterval(timer);
+ var i=0;
+ setState(0);
+ timer=setInterval(function(){
+   i++;
+   if(i>2){clearInterval(timer);return;}
+   setState(i);
+ },1800);
+});
+setState(0);
+})();
+</script>
+</body>
+</html>
